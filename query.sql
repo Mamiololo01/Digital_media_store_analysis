@@ -81,3 +81,47 @@ INNER JOIN customer c ON inv.customer_id = c.customer_id
 INNER JOIN employee e ON c.support_rep_Id = e.employee_id
 GROUP BY e.employee_id, e.first_name, e.last_name
 ORDER BY sales_revenue DESC;
+
+------Task 1.6 – Churn Prediction
+-----Identify customers who haven't purchased in 6+ months.
+
+WITH churn_list AS (
+    SELECT customer_id, MAX(invoice_date) AS churn_list
+    FROM invoice inv
+    GROUP BY Customer_Id
+)
+SELECT 
+    c.customer_id, 
+    c.first_name || ' ' || c.last_name AS customer_name, 
+    cl.churn_list, 
+    EXTRACT(DAY FROM (CURRENT_DATE - cl.churn_list)) AS inactive_days, 
+    COUNT(inv.Invoice_id) AS past_purchases, 
+    COALESCE(SUM(inv.total), 0) AS total_spent
+FROM Customer c
+JOIN churn_list cl ON c.customer_id = cl.customer_id
+LEFT JOIN invoice inv ON c.customer_id = inv.customer_id
+WHERE EXTRACT(DAY FROM (CURRENT_DATE - cl.churn_list)) > 180
+GROUP BY c.customer_id, cl.churn_list;
+
+-----------Task 1.8 – Recommendation System
+---------Find customers with similar music taste.
+-- Customer similarity based on track purchases
+
+WITH TrackPurchases AS (
+    SELECT customer_id, track_id
+	FROM invoice_line il
+    JOIN invoice i ON il.Invoice_Id = i.invoice_id
+),
+Similarity AS (
+    SELECT 
+        a.customer_id AS customer1, 
+        b.customer_id AS customer2,
+        COUNT(DISTINCT a.track_id) AS common_tracks
+    FROM TrackPurchases a
+    JOIN TrackPurchases b ON a.Track_Id = b.Track_Id AND a.Customer_Id <> b.Customer_Id
+    GROUP BY a.Customer_Id, b.Customer_Id
+)
+SELECT customer1, customer2, common_tracks
+FROM Similarity
+ORDER BY common_tracks DESC
+LIMIT 5;
