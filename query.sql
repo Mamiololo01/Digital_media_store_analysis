@@ -35,3 +35,49 @@ SELECT
     customer_rank
 FROM customer_spend
 WHERE customer_rank <= 10;
+
+-------Task 1.3 – Track Popularity
+----Find the top 10 most purchased tracks.
+
+SELECT 
+    t.name,
+    COUNT(inl.invoice_line_id) AS Invoice_count
+FROM Invoice_Line inl
+JOIN Track t ON inl.track_id = t.track_id
+GROUP BY t.track_id, t.name
+ORDER BY Invoice_count DESC
+LIMIT 10;
+
+
+----Task 1.4 – Popularity Over Time
+----Find the top 5 most popular tracks per month.
+
+WITH MonthlyPopularity AS (
+    SELECT 
+        TO_CHAR(inv.Invoice_Date, 'YYYY-MM') AS Month, 
+        t.name AS track_name, 
+        COUNT(inl.invoice_line_id) AS count_monthly_purchase, 
+        DENSE_RANK() OVER (PARTITION BY TO_CHAR(inv.Invoice_Date, 'YYYY-MM') 
+                     ORDER BY COUNT(inl.Invoice_Line_Id) DESC) AS popularity_rank
+    FROM invoice inv
+    INNER JOIN invoice_Line inl ON inv.invoice_Id = inl.invoice_Id
+    JOIN Track t ON inl.track_id = t.track_id
+    GROUP BY TO_CHAR(inv.invoice_date, 'YYYY-MM'), t.track_id, t.name
+)
+SELECT Month, track_name, count_monthly_purchase
+FROM MonthlyPopularity
+WHERE popularity_rank <= 5;
+
+
+----Task 1.5 – Employee Sales Performance
+----Identify top-performing sales representatives.
+SELECT 
+    e.employee_id, 
+	e.title,
+    e.first_name || ' ' || e.last_name AS employee_name, 
+    SUM(inv.Total) AS sales_revenue
+FROM Invoice inv
+INNER JOIN customer c ON inv.customer_id = c.customer_id
+INNER JOIN employee e ON c.support_rep_Id = e.employee_id
+GROUP BY e.employee_id, e.first_name, e.last_name
+ORDER BY sales_revenue DESC;
