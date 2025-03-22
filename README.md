@@ -22,6 +22,21 @@ To set up the project locally, follow these steps:
    pip install -r requirements.txt
    ```
 
+## Implementation
+
+To run the batch processing application, kindly use the command below:
+   ```bash
+   python3 etl.py
+   ```
+
+To run the real-time processing application, kindly use the command below:
+   ```bash
+   docker-compose up -d
+   python3 stream_etl.py
+   ```
+
+
+
 ## Technical architecture
 
 Below is the proposed ETL pipeline architecture for both batching and real-time streaming

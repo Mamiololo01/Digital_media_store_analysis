@@ -16,7 +16,7 @@ invoice_df.show(10)
 # Replace empty values in column billing_state with not applicable
 transform_df = invoice_df.withColumn("billing_state", when(col("billing_state") == "", "N/A").otherwise(col("billing_state")))
 
-# Display the value
+# Display the value of the transformed dataframe
 transform_df.show(10)
 
 # Load transformed data to destination 
@@ -26,7 +26,7 @@ transform_df.write.csv('Data/transformed/transformed_invoice.csv', header=True, 
 aggregate_day_df = transform_df.groupBy('invoice_date') \
                                .agg(_sum('total').alias('daily_sales'))
 
-# Display the value
+# Display the value of aggregated dataframe
 aggregate_day_df.show(40)
 
 # Aggregation of sales by week
@@ -42,22 +42,6 @@ aggregate_week_df.show()
 
 
 # Task 2.4 – Data Quality and Validation
-
-# def validate_data(invoice_df):
-#     """
-#     Perform basic data quality checks on the given DataFrame.
-#     """
-#     # Check for missing values
-#     missing_count = invoice_df.filter(col("Total").isNull()).count()
-#     if missing_count > 0:
-#         print(f" Warning: {missing_count} rows contain missing values.")
-
-#     # Check for duplicates
-#     if invoice_df.count() != invoice_df.dropDuplicates().count():
-#         print(" Warning: Duplicate rows detected.")
-    
-
-#     print(" Data validation completed.")
 def validate_data(invoice_df):
     """
     Automated quality check on the pipeline during ETL phase
