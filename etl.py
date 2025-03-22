@@ -23,7 +23,8 @@ transform_df.show(10)
 transform_df.write.csv('Data/transformed/transformed_invoice.csv', header=True, mode='overwrite')
 
 # Aggregation of sales by day
-aggregate_day_df = transform_df.groupBy('invoice_date').agg(_sum('total').alias('daily_sales'))
+aggregate_day_df = transform_df.groupBy('invoice_date') \
+                               .agg(_sum('total').alias('daily_sales'))
 
 # Display the value
 aggregate_day_df.show(40)
@@ -37,3 +38,48 @@ aggregate_week_df = transform_df.groupBy(year(col("invoice_date")).alias("year")
 
 # Display the value
 aggregate_week_df.show()
+
+
+
+# Task 2.4 – Data Quality and Validation
+
+# def validate_data(invoice_df):
+#     """
+#     Perform basic data quality checks on the given DataFrame.
+#     """
+#     # Check for missing values
+#     missing_count = invoice_df.filter(col("Total").isNull()).count()
+#     if missing_count > 0:
+#         print(f" Warning: {missing_count} rows contain missing values.")
+
+#     # Check for duplicates
+#     if invoice_df.count() != invoice_df.dropDuplicates().count():
+#         print(" Warning: Duplicate rows detected.")
+    
+
+#     print(" Data validation completed.")
+def validate_data(invoice_df):
+    """
+    Automated quality check on the pipeline during ETL phase
+    """
+    # Check for missing values
+    missing_count = invoice_df.filter(col("Total").isNull()).count()
+    if missing_count > 0:
+        print(f" Warning: {missing_count} rows contain missing values.")
+    else:
+        print(" No missing values found.")
+
+    # Check for duplicates
+    duplicate_count = invoice_df.count() - invoice_df.dropDuplicates().count()
+    if duplicate_count > 0:
+        print(f" Warning: {duplicate_count} duplicate records detected.")
+    elif duplicate_count == 0:
+        print(" No duplicate record found.")
+    else:
+        print(" Error: Unexpected issue while checking for duplicates.")
+
+    print(" Data validation completed.")
+
+# # Apply the function
+validate_data(invoice_df)
+
